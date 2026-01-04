@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>ダメージ計算ツール試作品</title>
+<style>
+body { font-family: sans-serif; }
+fieldset { margin-bottom: 12px; }
+label { display:inline-block; width:320px; }
+input, select { width:150px; }
+.log, .debug {
+  white-space: pre-line;
+  background:#f4f4f4;
+  padding:10px;
+  margin-top:10px;
+  font-family: monospace;
+}
+.debug { background:#eef; }
+button { padding:6px 16px; font-size:14px; }
+</style>
+</head>
+<body>
+
+<h2>ダメージ計算ツール試作品</h2>
+
+<form>
+
+<fieldset>
+<legend>攻撃側ステータス</legend>
+
+<label>属性</label>
+<select id="atkAttr">
+<option>心</option><option>夢</option><option>彩</option>
+<option>幻</option><option>神</option><option>異世界</option>
+</select><br>
+
+<label>タイプ</label>
+<select id="atkType">
+<option>応援</option><option>調和</option><option>神鋭</option>
+<option>恩寵</option><option>強靭</option><option>勇猛</option>
+</select><br>
+
+<label>位置</label>
+<select id="atkPos"><option>前衛</option><option>後衛</option></select><br>
+
+<label>攻撃種類</label>
+<select id="atkKind">
+<option value="normal">通常攻撃</option>
+<option value="skill">スキル攻撃</option>
+</select><br>
+
+<label>基礎通常攻撃%</label><input id="baseNormal" value="100"><br>
+<label>基礎スキル%</label><input id="baseSkill" value="100"><br>
+<label>攻撃力</label><input id="atk"><br>
+<label>命中%</label><input id="hit"><br>
+<label>会心率%</label><input id="crit"><br>
+<label>会心ダメージ%</label><input id="critDmg" value="150"><br>
+<label>貫通%</label><input id="pen"><br>
+<label>スキルダメージ増加%</label><input id="skillUp"><br>
+<label>ダメージ増加%</label><input id="dmgUp"><br>
+<label>PvPダメージ増加%</label><input id="pvpUp"><br>
+
+<label>灼熱特効%</label><input id="burn">
+<label>毒特攻%</label><input id="poison"><br>
+<label>出血特効%</label><input id="bleed">
+<label>凍結特攻%</label><input id="freeze"><br>
+<label>目眩特効%</label><input id="stun">
+<label>沈黙特効%</label><input id="silence"><br>
+
+<label>分散補正(人数)</label><input id="spread" value="1"><br>
+
+<label>応援系に与えるダメージ増加%</label><input id="atkTypeUp_応援"><br>
+<label>調和系に与えるダメージ増加%</label><input id="atkTypeUp_調和"><br>
+<label>神鋭系に与えるダメージ増加%</label><input id="atkTypeUp_神鋭"><br>
+<label>恩寵系に与えるダメージ増加%</label><input id="atkTypeUp_恩寵"><br>
+<label>強靭系に与えるダメージ増加%</label><input id="atkTypeUp_強靭"><br>
+<label>勇猛系に与えるダメージ増加%</label><input id="atkTypeUp_勇猛"><br>
+
+<label>心属性に与えるダメージ増加%</label><input id="atkAttrUp_心"><br>
+<label>夢属性に与えるダメージ増加%</label><input id="atkAttrUp_夢"><br>
+<label>彩属性に与えるダメージ増加%</label><input id="atkAttrUp_彩"><br>
+<label>幻属性に与えるダメージ増加%</label><input id="atkAttrUp_幻"><br>
+
+<label>前衛の敵に与えるダメージ増加%</label><input id="frontUp"><br>
+<label>後衛の敵に与えるダメージ増加%</label><input id="backUp"><br>
+
+<label>最終ダメージ増加%</label><input id="finalUp"><br>
+<label>最終ダメージ減少%</label><input id="finalDown"><br>
+<label>一式性別補正%</label><input id="gender"><br>
+
+</fieldset>
+
+<fieldset>
+<legend>防御側ステータス</legend>
+
+<label>属性</label>
+<select id="defAttr">
+<option>心</option><option>夢</option><option>彩</option>
+<option>幻</option><option>神</option><option>異世界</option>
+</select><br>
+
+<label>タイプ</label>
+<select id="defType">
+<option>応援</option><option>調和</option><option>神鋭</option>
+<option>恩寵</option><option>強靭</option><option>勇猛</option>
+</select><br>
+
+<label>位置</label>
+<select id="defPos"><option>前衛</option><option>後衛</option></select><br>
+
+<label>状態</label>
+<input type="checkbox" id="sBurn">灼熱
+<input type="checkbox" id="sPoison">毒
+<input type="checkbox" id="sBleed">出血
+<input type="checkbox" id="sFreeze">凍結
+<input type="checkbox" id="sStun">目眩
+<input type="checkbox" id="sSilence">沈黙<br>
+
+<label>防御力</label><input id="def"><br>
+<label>ガード%</label><input id="guard"><br>
+<label>会心ダメージ軽減%</label><input id="critRed"><br>
+<label>貫通耐性%</label><input id="penRes"><br>
+<label>スキルダメージ軽減%</label><input id="skillRed"><br>
+<label>ダメージ軽減%</label><input id="dmgRed"><br>
+<label>PvPダメージ軽減%</label><input id="pvpRed"><br>
+<label>会心耐性%</label><input id="critRes"><br>
+
+<label>応援ダメージ耐性%</label><input id="defTypeRes_応援"><br>
+<label>調和ダメージ耐性%</label><input id="defTypeRes_調和"><br>
+<label>神鋭ダメージ耐性%</label><input id="defTypeRes_神鋭"><br>
+<label>恩寵ダメージ耐性%</label><input id="defTypeRes_恩寵"><br>
+<label>強靭ダメージ耐性%</label><input id="defTypeRes_強靭"><br>
+<label>勇猛ダメージ耐性%</label><input id="defTypeRes_勇猛"><br>
+
+<label>心属性から受けるダメージ減少%</label><input id="defAttrRes_心"><br>
+<label>夢属性から受けるダメージ減少%</label><input id="defAttrRes_夢"><br>
+<label>彩属性から受けるダメージ減少%</label><input id="defAttrRes_彩"><br>
+<label>幻属性から受けるダメージ減少%</label><input id="defAttrRes_幻"><br>
+
+<label>前衛から受けるダメージ減少%</label><input id="frontRes"><br>
+<label>後衛から受けるダメージ減少%</label><input id="backRes"><br>
+
+<label>最終ダメージ軽減%</label><input id="finalRed"><br>
+<label>鳳凰魔法陣ガード補正%</label><input id="phoenix"><br>
+<label>霊力ガード補正%</label><input id="spirit"><br>
+
+</fieldset>
+
+<button type="button" onclick="calc()">計算</button>
+</form>
+
+<h3>計算ログ</h3>
+<div id="log" class="log"></div>
+
+<h3>デバッグログ</h3>
+<div id="debug" class="debug"></div>
+
+<script>
+const v=id=>Number(document.getElementById(id)?.value)||0;
+const cap=(x,min,max)=>Math.max(min,Math.min(max,x));
+const fmt=n=>n>=1e9?(n/1e9).toFixed(1)+"B":
+             n>=1e6?(n/1e6).toFixed(1)+"M":
+             n>=1e3?(n/1e3).toFixed(1)+"K":
+             Math.round(n);
+
+function calc(){
+try{
+const dbg=[];
+
+const atkAttrSel=atkAttr.value;
+const defAttrSel=defAttr.value;
+const atkTypeSel=atkType.value;
+const defTypeSel=defType.value;
+const atkPosSel=atkPos.value;
+const defPosSel=defPos.value;
+
+let r=cap(v("def")/(v("def")+0.1),0,0.7); dbg.push("防御補正="+r);
+let n=cap(1+v("pen")/100-v("penRes")/100,1,1.7); dbg.push("貫通補正="+n);
+let l=cap(1+v("dmgUp")/100-v("dmgRed")/100,0.3,99); dbg.push("ダメージ増加補正="+l);
+
+let extra=0;
+if(sBurn.checked)extra+=v("burn");
+if(sPoison.checked)extra+=v("poison");
+if(sBleed.checked)extra+=v("bleed");
+if(sFreeze.checked)extra+=v("freeze");
+if(sStun.checked)extra+=v("stun");
+if(sSilence.checked)extra+=v("silence");
+
+let l2=(l+extra/100)/Math.max(1,v("spread")); dbg.push("特攻補正="+l2);
+
+let h=cap(1+v("pvpUp")/100-v("pvpRed")/100,0.3,99); dbg.push("PvPダメージ増加補正="+h);
+let k=v("atkAttrUp_"+defAttrSel)/100;
+let j=v("defAttrRes_"+atkAttrSel)/100;
+let h2=h+k-j; dbg.push("属性補正="+h2);
+
+let p=atkKind.value==="skill"
+ ?cap(1+v("skillUp")/100-v("skillRed")/100,0.3,99):1;
+
+let d=atkKind.value==="skill"?v("baseSkill")/100:v("baseNormal")/100; dbg.push("基礎ダメージ倍率="+d);
+let P=v("atkTypeUp_"+defTypeSel)/100;
+let vr=v("defTypeRes_"+atkTypeSel)/100;
+let d2=cap(d+P-vr,0.3,99);
+let Pvr=P-vr; dbg.push("タイプ補正="+Pvr);
+
+let ca=defPosSel==="前衛"?v("frontUp")/100:v("backUp")/100;
+let cb=atkPosSel==="前衛"?v("frontRes")/100:v("backRes")/100;
+let c=cap(1+ca-cb,0.3,99); dbg.push("位置補正="+c);
+
+let u=Math.round(v("atk")*d2*l2*(n-r)*h2*p*c); dbg.push("u="+u);
+
+let g=1-cap(0.33+v("phoenix")/100+v("spirit")/100,0,0.9); dbg.push("ガード補正="+g);
+let b=v("critDmg")/100-v("critRed")/100; dbg.push("会心補正="+b);
+let I=1+(v("finalUp")-v("finalDown")-v("finalRed")+v("gender"))/100;dbg.push("最終ダメージ補正="+I);
+
+let gp=cap(v("guard")-v("hit"),0,100); dbg.push("ガード確率="+gp);
+let bp=cap(v("crit")-v("critRes"),0,100); dbg.push("会心確率="+bp);
+
+log.innerText=
+`位置補正:${(c*100).toFixed(1)}%
+
+ガード無・会心無 ${(100-gp)*(100-bp)/100}% : ${fmt(u*I)}
+ガード無・会心有 ${(100-gp)*bp/100}% : ${fmt(u*b*I)}
+ガード有・会心無 ${gp*(100-bp)/100}% : ${fmt(u*g*I)}
+ガード有・会心有 ${gp*bp/100}% : ${fmt(u*g*b*I)}`;
+
+debug.innerText=dbg.join("\n");
+
+}catch(e){
+debug.innerText="ERROR:\n"+e.stack;
+}
+}
+</script>
+
+</body>
+</html>
+
