@@ -67,7 +67,7 @@ button { padding:6px 16px; font-size:14px; }
 <label>目眩特効%</label><input id="stun">
 <label>沈黙特効%</label><input id="silence"><br>
 
-<label>分散補正(人数)</label><input id="spread" value="1"><br>
+<label>単体攻撃ダメージ補正</label><input id="spread"><br>
 
 <label>応援系に与えるダメージ増加%</label><input id="atkTypeUp_応援"><br>
 <label>調和系に与えるダメージ増加%</label><input id="atkTypeUp_調和"><br>
@@ -158,11 +158,12 @@ button { padding:6px 16px; font-size:14px; }
 <script>
 const v=id=>Number(document.getElementById(id)?.value)||0;
 const cap=(x,min,max)=>Math.max(min,Math.min(max,x));
-const fmt=n=>n>=1e9?(n/1e9).toFixed(1)+"B":
-             n>=1e6?(n/1e6).toFixed(1)+"M":
-             n>=1e3?(n/1e3).toFixed(1)+"K":
-             Math.round(n);
-
+const fmt = n => {
+  if (n >= 1e9) return (n / 1e9).toPrecision(4) + "B";
+  if (n >= 1e6) return (n / 1e6).toPrecision(4) + "M";
+  if (n >= 1e3) return (n / 1e3).toPrecision(4) + "K";
+  return Math.round(n);
+};
 function calc(){
 try{
 const dbg=[];
@@ -186,7 +187,7 @@ if(sFreeze.checked)extra+=v("freeze");
 if(sStun.checked)extra+=v("stun");
 if(sSilence.checked)extra+=v("silence");
 
-let l2=(l+extra/100)/Math.max(1,v("spread")); dbg.push("特攻補正="+l2);
+let l2=(l+extra/100)+v("spread")/100; dbg.push("特攻補正="+l2);
 
 let h=cap(1+v("pvpUp")/100-v("pvpRed")/100,0.3,99); dbg.push("PvPダメージ増加補正="+h);
 let k=v("atkAttrUp_"+defAttrSel)/100;
@@ -216,9 +217,7 @@ let gp=cap(v("guard")-v("hit"),0,100); dbg.push("ガード確率="+gp);
 let bp=cap(v("crit")-v("critRes"),0,100); dbg.push("会心確率="+bp);
 
 log.innerText=
-`位置補正:${(c*100).toFixed(1)}%
-
-ガード無・会心無 ${(100-gp)*(100-bp)/100}% : ${fmt(u*I)}
+`ガード無・会心無 ${(100-gp)*(100-bp)/100}% : ${fmt(u*I)}
 ガード無・会心有 ${(100-gp)*bp/100}% : ${fmt(u*b*I)}
 ガード有・会心無 ${gp*(100-bp)/100}% : ${fmt(u*g*I)}
 ガード有・会心有 ${gp*bp/100}% : ${fmt(u*g*b*I)}`;
@@ -233,4 +232,5 @@ debug.innerText="ERROR:\n"+e.stack;
 
 </body>
 </html>
+
 
